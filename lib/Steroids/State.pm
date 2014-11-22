@@ -16,17 +16,19 @@ class Steroids::State {
     method keypressed($k) { }
     method gamepad($ev) { }
 
-    multi method add_sprite(Str $asset, Int $x, Int $y) {
+    multi method add_sprite(Str $asset, Int $x, Int $y,
+                            :&as = sub { Steroids::Entity.new(|%_) }) {
         unless %.assets{$asset}:exists {
             die "No such asset loaded: $asset"
         }
-        my $d = Steroids::Entity.new(:$x, :$y, :img(%.assets{$asset}));
+        my $d = as(:$x, :$y, :img(%.assets{$asset}));
         @!entities.push: $d;
         return $d;
     }
 
-    multi method add_sprite(Texture $sprite, Int $x, Int $y) {
-        my $d = Steroids::Entity.new(:$x, :$y, :img($sprite));
+    multi method add_sprite(Texture $sprite, Int $x, Int $y,
+                            :&as = sub { Steroids::Entity.new(|%_) }) {
+        my $d = as(:$x, :$y, :img($sprite));
         @!entities.push: $d;
         return $d;
     }

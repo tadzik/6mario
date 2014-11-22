@@ -2,14 +2,41 @@
 use lib 'blib/lib';
 use Steroids;
 
+constant TILESIZE = 32;
+class Mario is Steroids::Entity {
+    has $.image;
+
+    has @!edges = [], [], [], [];
+
+    method move($dx, $dy) {
+        $.x += $dx;
+        $.y += $dy;
+        self.update-edges;
+    }
+
+    method update-edges {
+        @!edges[0][0] = ($.x);           @!edges[0][1] = ($.y);
+        @!edges[1][0] = ($.x + $.w - 1); @!edges[1][1] = ($.y);
+        @!edges[2][0] = ($.x);           @!edges[2][1] = ($.y + $.h - 1);
+        @!edges[3][0] = ($.x + $.w - 1); @!edges[3][1] = ($.y + $.h - 1);
+    }
+
+    method report {
+        print "Tiles:";
+        for @!edges -> $e {
+            print " (" ~ ($e[0] div 32) ~ ", " ~ ($e[1] div 32) ~ "),"
+        }
+        say '';
+    }
+}
+
 class Main is Steroids::State {
     has $!mario;
 
     method create {
         self.load_spritesheet('mario', 'img/smallmario.png', 38, 49, 4);
-        $!mario = self.add_sprite('mario', 0, 0);
-        $!mario.y = self.height div 2;
-        $!mario.x = self.width div 2;
+        $!mario = self.add_sprite('mario', 0, 0, as => sub { Mario.new(|%_) });
+        $!mario.move(self.width div 2, self.height div 2);
     }
 
     method keypressed($k) {
@@ -17,14 +44,19 @@ class Main is Steroids::State {
     }
 
     method update($dt) {
+        my ($dx, $dy) = (0, 0);
         if self.is_pressed("Left") {
-            $!mario.x -= 15;
+            $dx -= 15;
         } elsif self.is_pressed("Right") {
-            $!mario.x += 15;
+            $dx += 15;
         } elsif self.is_pressed("Up") {
-            $!mario.y -= 15;
+            $dy -= 15;
         } elsif self.is_pressed("Down") {
-            $!mario.y += 15;
+            $dy += 15;
+        }
+        if any($dx, $dy) {
+            $!mario.move($dx, $dy);
+            $!mario.report;
         }
     }
 }
