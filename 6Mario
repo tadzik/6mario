@@ -2,7 +2,7 @@
 use lib 'blib/lib';
 use Steroids;
 
-constant TILESIZE = 32;
+constant TILESIZE = 64;
 class Mario is Steroids::Entity {
     has $.image;
 
@@ -30,13 +30,44 @@ class Mario is Steroids::Entity {
     }
 }
 
+constant SKY = 0;
+constant GRASS = 1;
+constant BRICK = 2;
+
+my %tile-mapping =
+    s => SKY,
+    G => GRASS,
+    B => BRICK;
+ 
+class Level {
+    has @.sprites;
+    has @.reachable;
+}
+
 class Main is Steroids::State {
     has $!mario;
+    has $!level;
+
+    method load_level(Str $filename) {
+        $!level = Level.new;
+        my $i = 0;
+        for lines($filename) -> $line {
+            my $j = 0;
+            for $line.comb -> $tile {
+                $!level.sprites[$j][$i] = %tile-mapping{$tile};
+                $!level.reachable[$j][$i] = so $tile ~~ /<[a..z]>/;
+                $j++;
+            }
+            $i++;
+        }
+    }
 
     method create {
         self.load_spritesheet('mario', 'img/smallmario.png', 38, 49, 4);
         $!mario = self.add_sprite('mario', 0, 0, as => sub { Mario.new(|%_) });
         $!mario.move(self.width div 2, self.height div 2);
+
+        my $level = self.load_level('level');
     }
 
     method keypressed($k) {
