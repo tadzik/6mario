@@ -1,0 +1,36 @@
+#!/usr/bin/env perl6
+use lib 'blib/lib';
+use Steroids;
+
+class Main is Steroids::State {
+    has $!mario;
+
+    method create {
+        self.load_spritesheet('mario', 'img/smallmario.png', 38, 49, 4);
+        $!mario = self.add_sprite('mario', 0, 0);
+        $!mario.y = self.height div 2;
+        $!mario.x = self.width div 2;
+    }
+
+    method keypressed($k) {
+        exit if $k eq "Escape";
+    }
+
+    method update($dt) {
+        if self.is_pressed("Left") {
+            $!mario.x -= 15;
+        } elsif self.is_pressed("Right") {
+            $!mario.x += 15;
+        } elsif self.is_pressed("Up") {
+            $!mario.y -= 15;
+        } elsif self.is_pressed("Down") {
+            $!mario.y += 15;
+        }
+    }
+}
+
+given Steroids::Game.new {
+    .add_state('main', { Main.new });
+    .change_state('main');
+    .start;
+}
