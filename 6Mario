@@ -3,15 +3,39 @@ use lib 'blib/lib';
 use Steroids;
 
 constant TILESIZE = 64;
+
+constant SKY = 0;
+constant GRASS = 1;
+constant BRICK = 2;
+
+my %tile-mapping =
+    s => SKY,
+    G => GRASS,
+    B => BRICK;
+
+class Level {
+    has @.sprites;
+    has @.reachable;
+}
+
 class Mario is Steroids::Entity {
     has $.image;
 
     has @!edges = [], [], [], [];
 
-    method move($dx, $dy) {
+    method move($dx, $dy, $level) {
         $.x += $dx;
         $.y += $dy;
         self.update-edges;
+        for @!edges -> $e {
+            if not $level.reachable[$e[0] div TILESIZE][$e[1] div TILESIZE] {
+                $.x -= $dx;
+                $.y -= $dy;
+                self.update-edges;
+                return False;
+            }
+        }
+        return True;
     }
 
     method update-edges {
@@ -28,20 +52,6 @@ class Mario is Steroids::Entity {
         }
         say '';
     }
-}
-
-constant SKY = 0;
-constant GRASS = 1;
-constant BRICK = 2;
-
-my %tile-mapping =
-    s => SKY,
-    G => GRASS,
-    B => BRICK;
- 
-class Level {
-    has @.sprites;
-    has @.reachable;
 }
 
 class Main is Steroids::State {
@@ -84,7 +94,7 @@ class Main is Steroids::State {
         self.draw_level;
 
         $!mario = self.add_sprite('mario', 0, 0, as => sub { Mario.new(|%_) });
-        $!mario.move(self.width div 2, self.height div 2);
+        $!mario.move(self.width div 2, self.height div 2, $!level);
     }
 
     method keypressed($k) {
@@ -106,8 +116,9 @@ class Main is Steroids::State {
             $dy += 15;
         }
         if any($dx, $dy) {
-            $!mario.move($dx, $dy);
-            $!mario.report;
+            unless $!mario.move($dx, $dy, $!level) {
+                say "Illegal move!"; $!mario.report;
+            }
         }
     }
 }
