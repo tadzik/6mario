@@ -24,7 +24,7 @@ class Mario is Steroids::Entity {
     method report {
         print "Tiles:";
         for @!edges -> $e {
-            print " (" ~ ($e[0] div 32) ~ ", " ~ ($e[1] div 32) ~ "),"
+            print " (" ~ ($e[0] div TILESIZE) ~ ", " ~ ($e[1] div TILESIZE) ~ "),"
         }
         say '';
     }
