@@ -62,12 +62,29 @@ class Main is Steroids::State {
         }
     }
 
+    method draw_level() {
+        my $x = 0;
+        for ^$!level.sprites.elems {
+            my $y = 0;
+            for ^$!level.sprites[$x].elems {
+                self.add_sprite($!level.sprites[$x][$y].Str, $x * TILESIZE, $y * TILESIZE);
+                $y++;
+            }
+            $x++;
+        }
+    }
+
     method create {
+        self.load_bitmap(GRASS.Str, 'img/grass.png');
+        self.load_bitmap(BRICK.Str, 'img/brick.png');
+        self.load_bitmap(SKY.Str, 'img/sky.png');
         self.load_spritesheet('mario', 'img/smallmario.png', 38, 49, 4);
+
+        self.load_level('level');
+        self.draw_level;
+
         $!mario = self.add_sprite('mario', 0, 0, as => sub { Mario.new(|%_) });
         $!mario.move(self.width div 2, self.height div 2);
-
-        my $level = self.load_level('level');
     }
 
     method keypressed($k) {
