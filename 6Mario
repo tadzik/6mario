@@ -51,7 +51,7 @@ class Main is Steroids::State {
     method load_level(Str $filename) {
         $!level = Level.new;
         my $i = 0;
-        for lines($filename) -> $line {
+        for lines($filename.IO) -> $line {
             my $j = 0;
             for $line.comb -> $tile {
                 $!level.sprites[$j][$i] = %tile-mapping{$tile};
