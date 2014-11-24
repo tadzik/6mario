@@ -95,11 +95,14 @@ class Main is Steroids::State {
         my ($dx, $dy) = (0, 0);
         if self.is_pressed("Left") {
             $dx -= 15;
-        } elsif self.is_pressed("Right") {
+        }
+        if self.is_pressed("Right") {
             $dx += 15;
-        } elsif self.is_pressed("Up") {
+        }
+        if self.is_pressed("Up") {
             $dy -= 15;
-        } elsif self.is_pressed("Down") {
+        }
+        if self.is_pressed("Down") {
             $dy += 15;
         }
         if any($dx, $dy) {
